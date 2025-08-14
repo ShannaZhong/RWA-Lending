@@ -2,7 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
-import LayoutContent from "@/components/LayoutContent"
+// import LayoutContent from "@/components/LayoutContent"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -26,7 +26,8 @@ export default function RootLayout({
             {children}
           </div>
         </div> */}
-        <LayoutContent children={children}/>
+        {/* <LayoutContent children={children}/> */}
+        {children}
       </body>
     </html>
   )
