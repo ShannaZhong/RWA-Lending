@@ -1,8 +1,8 @@
 "use client"
 import { usePathname } from 'next/navigation'
 import React from 'react'
-import LandingNavbar from './LandingNavbar'
-import Navbar from './navbar'
+import LandingNavbar from './navbar/LandingNavbar'
+import Navbar from './navbar/Navbar'
 import { WagmiProvider } from 'wagmi'
 import { wagmiConfig } from '@/config/wagmiConfig'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
