@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   TrendingUp,
   Wallet,
@@ -15,11 +15,50 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { debtAssets, userCollateralPositions, userSupplyPositions } from "@/lib/constants"
 import { formatNumber, formatPercentage, formatUtilization } from "@/lib/helper"
 import { useSupply } from "@/hooks/contexts/SupplyHookContext"
+import { FormattedAssetData } from "@/types/contracts"
 
 export default function SupplyPage() {
   const [paymentMethod, setPaymentMethod] = useState("crypto")
-  const [selectedLendAsset, setSelectedLendAsset] = useState("EURC")
-  const {debtAssets,} = useSupply();
+  const [amount, setAmount] = useState("0")
+    const [selectedLendAsset, setSelectedLendAsset] = useState<FormattedAssetData|null>(null)
+    const {
+      supply,
+      isSupplying,
+      supplyError,
+      supplyTxHash,
+      isSupplyConfirming,
+      isSupplyConfirmed,
+      supplyReceipt,
+      resetSupplyState,
+      debtAssets,
+    } = useSupply()
+
+    const handleSupply = async () => {
+      console.log("TRIGGER")
+      if (!amount || parseFloat(amount) <= 0) {
+        alert('Please enter a valid amount')
+        return
+      }
+
+      if(!selectedLendAsset) {
+        alert('Please select a valid asset')
+        return
+      }
+  
+      try {
+        supply({
+          asset: selectedLendAsset!.asset,
+          amount,
+          decimals: selectedLendAsset?.decimals 
+        })
+      } catch (error) {
+        console.error('Supply error:', error)
+      }
+    }
+
+    useEffect(() => {
+      console.log(supplyError, "ERROR SUPPLy")
+    }, [supplyError])
 
   return (
     <div className="space-y-4">
@@ -49,16 +88,16 @@ export default function SupplyPage() {
                 {debtAssets.map((asset, index) => (
                   <div
                     key={index}
-                    className={`card-dark rounded-lg p-3 cursor-pointer transition-all hover:glow-purple ${selectedLendAsset === asset.symbol ? "border-blue-500/50 glow-purple bg-blue-500/5" : ""
+                    className={`card-dark rounded-lg p-3 cursor-pointer transition-all hover:glow-purple ${selectedLendAsset?.symbol === asset.symbol ? "border-blue-500/50 glow-purple bg-blue-500/5" : ""
                       }`}
-                    onClick={() => setSelectedLendAsset(asset.symbol)}
+                    onClick={() => setSelectedLendAsset(asset)}
                   >
                     {/* First Row - Asset Info and APY */}
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-3">
                         <img
                           src={asset.icon}
-                          className={`w-8 h-8 rounded-full flex items-center justify-center text-lg ${selectedLendAsset === asset.symbol
+                          className={`w-8 h-8 rounded-full flex items-center justify-center text-lg ${selectedLendAsset?.symbol === asset.symbol
                               ? "bg-blue-500/20 border-2 border-blue-500/50"
                               : `bg-[${asset.color}20]`
                             }`}
@@ -68,7 +107,7 @@ export default function SupplyPage() {
                         <div>
                           <div className="font-semibold text-white text-sm flex items-center">
                             {asset.symbol}
-                            {selectedLendAsset === asset.symbol && (
+                            {selectedLendAsset?.symbol === asset.symbol && (
                               <Badge className="ml-2 bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
                                 Selected
                               </Badge>
@@ -160,7 +199,7 @@ export default function SupplyPage() {
                     <Label className="text-sm font-semibold text-white">Selected Lending Asset</Label>
                     <div className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-lg p-4 border border-blue-500/20">
                       {(() => {
-                        const selectedAsset = debtAssets.find((a) => a.symbol === selectedLendAsset)
+                        const selectedAsset = debtAssets.find((a) => a.symbol === selectedLendAsset?.symbol )
                         return selectedAsset ? (
                           <div className="space-y-3">
                             <div className="flex items-center justify-between">
@@ -227,6 +266,8 @@ export default function SupplyPage() {
                       Deposit Amount
                     </Label>
                     <Input
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
                       id="deposit-amount"
                       type="number"
                       placeholder="1000"
@@ -381,6 +422,7 @@ export default function SupplyPage() {
                       {/* Action Button */}
                       <Button
                         size="lg"
+                        onClick={() => handleSupply()}
                         className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-lg py-3 text-sm font-semibold transition-all"
                       >
                         Supply
