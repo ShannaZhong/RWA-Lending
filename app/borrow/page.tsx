@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Slider } from "@/components/ui/slider"
 import { Progress } from "@/components/ui/progress"
-import { borrowAssets, collateralAssets, userDebtPositions } from "@/lib/constants"
+import { collateralAssets, userCollateralPositions } from "@/lib/constants"
 import { formatNumber, formatPercentage } from "@/lib/helper"
 import { useSupply } from "@/hooks/contexts/SupplyHookContext"
 import { useBorrow } from "@/hooks/contexts/BorrowHookContext"
@@ -32,7 +32,7 @@ export default function BorrowPage() {
 
   //Hook
   const {debtAssets,} = useSupply();
-  // const {collateralAssets} = useBorrow();
+  const {collateralAssets} = useBorrow();
 
   const calculateBorrowAmount = () => {
     if (!collateralAmount) return "0"
@@ -389,13 +389,13 @@ export default function BorrowPage() {
         </div>
       </div>
 
-      {/* User Debt Positions Table */}
+      {/* User Collateral Positions Table */}
       <Card className="card-dark rounded-xl">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg font-bold text-white">Your Debt Positions</CardTitle>
+            <CardTitle className="text-lg font-bold text-white">Your Collateral Positions</CardTitle>
             <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">
-              {userDebtPositions.length} Active
+              {userCollateralPositions.length} Active
             </Badge>
           </div>
         </CardHeader>
@@ -409,13 +409,13 @@ export default function BorrowPage() {
                   <th className="text-right text-xs font-medium text-slate-400 pb-3">Borrow Balance</th>
                   <th className="text-right text-xs font-medium text-slate-400 pb-3">Balance USD</th>
                   <th className="text-right text-xs font-medium text-slate-400 pb-3">LTV</th>
-                  <th className="text-right text-xs font-medium text-slate-400 pb-3">Liq LTV / Penalty</th>
-                  <th className="text-right text-xs font-medium text-slate-400 pb-3">Net / Borrow</th>
+                  <th className="text-right text-xs font-medium text-slate-400 pb-3">Liquidation Threshold</th>
+                  <th className="text-right text-xs font-medium text-slate-400 pb-3">Current Utilization</th>
                   <th className="text-right text-xs font-medium text-slate-400 pb-3">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {userDebtPositions.map((position, index) => (
+                {userCollateralPositions.map((position, index) => (
                   <tr key={index} className="border-b border-slate-800/50">
                     <td className="py-4">
                       <div className="flex items-center space-x-3">
@@ -433,27 +433,35 @@ export default function BorrowPage() {
                       <div className="text-xs text-slate-400">{position.symbol}</div>
                     </td>
                     <td className="text-right py-4">
-                      <div className="font-semibold text-white text-sm">{position.borrowBalance}</div>
+                      <div className="font-semibold text-white text-sm">{position.balanceUSD}</div>
                       <div className="text-xs text-slate-400">{position.symbol}</div>
                     </td>
-                    <td className="text-right py-4">
-                      <div className="font-semibold text-white text-sm">${position.balanceUSD}</div>
-                    </td>
+                    {/* <td className="text-right py-4">
+                      <div className="font-semibold text-white text-sm">${position.netBase}</div>
+                      <div className="text-xs text-slate-400">Net {position.symbol}</div>
+                    </td> */}
                     <td className="text-right py-4">
                       <div className="font-semibold text-white text-sm">{position.ltv}%</div>
                     </td>
                     <td className="text-right py-4">
-                      <div className="font-semibold text-yellow-400 text-sm">{position.liqLTV}%</div>
-                      <div className="text-xs text-red-400">{position.penalty}% penalty</div>
+                      <div className="font-semibold text-yellow-400 text-sm">{position.liquidationThreshold}%</div>
+                      <div className="text-xs text-red-400">{40.0}% penalty</div>
                     </td>
-                    <td className="text-right py-4">
+                    {/* <td className="text-right py-4">
                       <div className="font-semibold text-green-400 text-sm">{position.netBorrow}</div>
                       <div className="text-xs text-slate-400">{position.interestRate}% APR</div>
                     </td>
                     <td className="text-right py-4">
+                      <div className="font-semibold text-green-400 text-sm">{position.currentRate}%</div>
+                      <div className="text-xs text-slate-400">{position.baseRate}% base</div>
+                    </td> */}
+                    <td className="text-right py-4">
+                      <div className="font-semibold text-cyan-400 text-sm">{position.currentUtilization}%</div>
+                    </td>
+                    <td className="text-right py-4">
                       <div className="flex justify-end space-x-2">
                         <Button size="sm" variant="outline" className="text-xs h-7 px-2">
-                          Repay
+                          Withdraw
                         </Button>
                         <Button size="sm" variant="outline" className="text-xs h-7 px-2">
                           <ExternalLink className="h-3 w-3" />

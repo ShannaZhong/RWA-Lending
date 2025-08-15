@@ -1,35 +1,30 @@
-export const userDebtPositions = [
+// User Supply Positions (for Supply Page) - Users supply these debt assets to earn yield
+export const userSupplyPositions = [
   {
     debtAsset: "0x1234...EURC",
     symbol: "EURC",
     name: "Euro Coin",
-    icon: "🇪🇺",
+    icon: "https://s2.coinmarketcap.com/static/img/coins/64x64/20641.png",
     supplyBalance: "2500.00",
-    borrowBalance: "1800.00",
-    balanceUSD: "1980.00",
-    ltv: "72.0",
-    liqLTV: "85.0",
-    penalty: "5.0",
-    netBorrow: "700.00",
-    interestRate: "0.0",
+    supplyBalanceUSD: "2500.00",
+    supplyRate: "450", // 4.5% in bps
+    utilizationRate: "750000000000000000", // 75%
+    earned: "28.75", // Example earned amount
   },
-  {
-    debtAsset: "0x5678...USDC",
-    symbol: "USDC",
-    name: "USD Coin",
-    icon: "💵",
-    supplyBalance: "1200.00",
-    borrowBalance: "800.00",
-    balanceUSD: "800.00",
-    ltv: "66.7",
-    liqLTV: "80.0",
-    penalty: "10.0",
-    netBorrow: "400.00",
-    interestRate: "0.0",
-  },
+  // {
+  //   debtAsset: "0x5678...USDC",
+  //   symbol: "USDC",
+  //   name: "USD Coin",
+  //   icon: "💵",
+  //   supplyBalance: "1200.00",
+  //   supplyBalanceUSD: "1200.00",
+  //   supplyRate: "520", // 5.2% in bps
+  //   utilizationRate: "729411764705882353", // 72.94%
+  //   earned: "15.60",
+  // },
 ]
 
-// Mock user collateral positions data
+// User Collateral Positions (for Borrow Page) - Users deposit these as collateral
 export const userCollateralPositions = [
   {
     collateralAsset: "0xdef0...ETH",
@@ -38,10 +33,11 @@ export const userCollateralPositions = [
     icon: "🔷",
     supplyBalance: "1.25",
     balanceUSD: "4275.00",
-    netBase: "0.85",
-    baseRate: "2.1",
-    currentRate: "4.2",
-    utilizationRate: "75.5",
+    ltv: "75.0",
+    liquidationThreshold: "80.0",
+    liquidationBonus: "5.0",
+    borrowPower: "3206.25", // 75% of 4275
+    currentUtilization: "65.0", // Currently using 65% of borrow power
   },
   {
     collateralAsset: "0x1111...stETH",
@@ -50,14 +46,16 @@ export const userCollateralPositions = [
     icon: "🟣",
     supplyBalance: "0.75",
     balanceUSD: "2561.25",
-    netBase: "0.65",
-    baseRate: "3.2",
-    currentRate: "5.8",
-    utilizationRate: "68.2",
+    ltv: "70.0",
+    liquidationThreshold: "75.0",
+    liquidationBonus: "7.5",
+    borrowPower: "1792.88", // 70% of 2561.25
+    currentUtilization: "58.0",
   },
 ]
 
-// Mock asset data based on AssetData structure
+
+// Debt Assets - These are the stablecoins users can supply or borrow
 export const debtAssets = [
   {
     asset: "0x1234...EURC",
@@ -115,6 +113,7 @@ export const debtAssets = [
   },
 ]
 
+// Collateral Assets - These are the assets users can deposit as collateral
 export const collateralAssets = [
   {
     asset: "0xdef0...ETH",
@@ -201,6 +200,61 @@ export const collateralAssets = [
   },
 ]
 
+export const ASSET_METADATA: Record<string, { symbol: string; name: string; icon: string; color: string; protocols: string[] }> = {
+  // Debt Assets (Stablecoins)
+  "0x8Cd770860726aab1151D6d9D7F05Fab9D4C68Ef4": { 
+    symbol: 'EURC', 
+    name: 'Euro Coin', 
+    icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/20641.png', 
+    color: '#8b5cf6', 
+    protocols: ['Morpho', 'Aave'] 
+  },
+  '0x5678...EURI': { 
+    symbol: 'EURI', 
+    name: 'Euro Stablecoin', 
+    icon: '💶', 
+    color: '#06b6d4', 
+    protocols: ['Compound', 'Morpho'] 
+  },
+  '0x9abc...USDC': { 
+    symbol: 'USDC', 
+    name: 'USD Coin', 
+    icon: '💵', 
+    color: '#2775CA', 
+    protocols: ['Aave', 'Compound'] 
+  },
+
+  // Collateral Assets
+  '0xdef0...ETH': { 
+    symbol: 'ETH', 
+    name: 'Ethereum', 
+    icon: '🔷', 
+    color: '#627EEA', 
+    protocols: ['Lido', 'RocketPool'] 
+  },
+  '0x1111...stETH': { 
+    symbol: 'stETH', 
+    name: 'Staked Ethereum', 
+    icon: '🟣', 
+    color: '#00A3FF', 
+    protocols: ['Lido'] 
+  },
+  '0x2222...WBTC': { 
+    symbol: 'WBTC', 
+    name: 'Wrapped Bitcoin', 
+    icon: '🟠', 
+    color: '#F7931A', 
+    protocols: [] 
+  },
+  "0x779877A7B0D9E8603169DdbD7836e478b4624789": { 
+    symbol: 'LINK', 
+    name: 'Chainlink', 
+    icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1975.png', 
+    color: '#375BD2', 
+    protocols: [] 
+  },
+}
+
 export const vaultStrategies = [
   {
     name: "ETH Liquid Staking",
@@ -230,43 +284,3 @@ export const vaultStrategies = [
     protocols: ["Aave", "Yearn", "Curve"],
   },
 ]
-
-export const borrowAssets = [
-  {
-    asset: "0x1234...EURC",
-    symbol: "EURC",
-    name: "Euro Coin",
-    icon: "🇪🇺",
-    decimals: 6,
-    rate: "0%",
-  },
-  {
-    asset: "0x5678...USDC",
-    symbol: "USDC",
-    name: "USD Coin",
-    icon: "💵",
-    decimals: 6,
-    rate: "0%",
-  },
-  {
-    asset: "0x9abc...DAI",
-    symbol: "DAI",
-    name: "Dai Stablecoin",
-    icon: "♦️",
-    decimals: 18,
-    rate: "0%",
-  },
-]
-
-
-export const ASSET_METADATA: Record<string, { symbol: string; name: string; icon: string; color: string; protocols: string[] }> = {
-  // Add your asset metadata here based on contract addresses
-  "0x8Cd770860726aab1151D6d9D7F05Fab9D4C68Ef4": { symbol: 'EURC', name: 'Euro Coin', icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/20641.png', color: '#8b5cf6', protocols: ['Morpho', 'Aave'] },
-  '0x5678...EURI': { symbol: 'EURI', name: 'Euro Stablecoin', icon: '💶', color: '#06b6d4', protocols: ['Compound', 'Morpho'] },
-  '0x9abc...USDC': { symbol: 'USDC', name: 'USD Coin', icon: '💵', color: '#2775CA', protocols: ['Aave', 'Compound'] },
-  // Collateral Assets
-    '0xdef0...ETH': { symbol: 'ETH', name: 'Ethereum', icon: '🔷', color: '#627EEA', protocols: ['Lido', 'RocketPool'] },
-    '0x1111...stETH': { symbol: 'stETH', name: 'Staked Ethereum', icon: '🟣', color: '#00A3FF', protocols: ['Lido'] },
-    '0x2222...WBTC': { symbol: 'WBTC', name: 'Wrapped Bitcoin', icon: '🟠', color: '#F7931A', protocols: [] },
-  "0x779877A7B0D9E8603169DdbD7836e478b4624789": { symbol: 'LINK', name: 'Chainlink', icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1975.png', color: '#375BD2', protocols: [] },
-}
