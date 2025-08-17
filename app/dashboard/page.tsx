@@ -246,10 +246,10 @@ export default function DashboardPage() {
                       <div className="text-slate-400">Current Holding</div>
                       <div className="font-semibold text-white">1000 EURC</div>
                     </div>
-                    <div>
+                    {/* <div>
                       <div className="text-slate-400">Current Holding USD</div>
                       <div className="font-semibold text-white">1000 EURC</div>
-                    </div>
+                    </div> */}
                     <div>
                       <div className="text-slate-400">APY</div>
                       <div className="font-semibold text-green-400">{strategy.apy}</div>
