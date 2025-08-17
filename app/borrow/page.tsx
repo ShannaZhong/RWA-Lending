@@ -280,7 +280,7 @@ export default function BorrowPage() {
                       <Slider value={ltv} onValueChange={setLtv} max={maxLtv} min={10} step={5} className="w-full" />
                       <div className="flex justify-between text-xs text-slate-400 mt-1">
                         <span>Conservative (10%)</span>
-                        <span>Aggressive ({maxLtv})</span>
+                        <span>Aggressive ({maxLtv}%)</span>
                       </div>
                     </div>
                   </div>
