@@ -27,7 +27,8 @@ export default function SupplyPage() {
       supply,
       transactionState,
       resetTransaction,
-      debtAssets
+      debtAssets,
+      userDebtPositions
     } = useSupply()
 
     // Handle supply submission
@@ -100,6 +101,12 @@ export default function SupplyPage() {
     }
   }, [transactionState.currentStep])
 
+  useEffect(() => {
+    if(debtAssets[0]){
+      setSelectedLendAsset(debtAssets[0])
+    }
+  }, [debtAssets])
+
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -139,7 +146,7 @@ export default function SupplyPage() {
                           src={asset.icon}
                           className={`w-8 h-8 rounded-full flex items-center justify-center text-lg ${selectedLendAsset?.symbol === asset.symbol
                               ? "bg-blue-500/20 border-2 border-blue-500/50"
-                              : `bg-[${asset.color}20]`
+                              : ``
                             }`}
                         >
                           {/* {asset.icon} */}
@@ -502,7 +509,7 @@ export default function SupplyPage() {
                 </tr>
               </thead>
               <tbody>
-                {userSupplyPositions.map((position, index) => (
+                {userDebtPositions.map((position, index) => (
                   <tr key={index} className="border-b border-slate-800/50">
                     <td className="py-4">
                       <div className="flex items-center space-x-3">
@@ -520,7 +527,7 @@ export default function SupplyPage() {
                       <div className="text-xs text-slate-400">{position.symbol}</div>
                     </td>
                     <td className="text-right py-4">
-                      <div className="font-semibold text-white text-sm">${position.supplyBalanceUSD}</div>
+                      <div className="font-semibold text-white text-sm">${Number(position.supplyBalance) * 1.17}</div>
                       <div className="text-xs text-slate-400">{position.symbol}</div>
                     </td>
                     {/* <td className="text-right py-4">
@@ -536,7 +543,7 @@ export default function SupplyPage() {
                     <td className="text-right py-4">
                       <div className="flex justify-end space-x-2">
                         <Button size="sm" variant="outline" className="text-xs h-7 px-2">
-                          Repay
+                          Withdraw
                         </Button>
                         <Button size="sm" variant="outline" className="text-xs h-7 px-2">
                           <ExternalLink className="h-3 w-3" />

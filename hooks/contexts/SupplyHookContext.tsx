@@ -141,7 +141,6 @@ export function SupplyProvider({ children }: { children: React.ReactNode }) {
           isFrozen: assetData.isFrozen,
           isPaused: assetData.isPaused,
           protocols: metadata.protocols,
-          color: metadata.color,
         }
         
         return formatted
@@ -174,6 +173,8 @@ export function SupplyProvider({ children }: { children: React.ReactNode }) {
         symbol: metadata.symbol,
         name: metadata.name,
         icon: metadata.icon,
+        utilizationRate: assetData?.utilizationRate || '0',
+        supplyRate: assetData?.supplyRate || '0',
         supplyBalance,
         borrowBalance,
         netBorrow,
