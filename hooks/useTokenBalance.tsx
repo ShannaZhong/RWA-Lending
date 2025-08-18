@@ -14,7 +14,10 @@ export interface TokenBalanceResult {
 
 export function useTokenBalance(tokenAddress?: string, decimals: number = 18): TokenBalanceResult {
   const { address: userAddress } = useAccount()
-  
+
+  // Check if this is a native token (ETH)
+  const isNativeToken = tokenAddress === "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
+
   const {
     data: balanceData,
     isLoading,
@@ -22,7 +25,8 @@ export function useTokenBalance(tokenAddress?: string, decimals: number = 18): T
     refetch
   } = useBalance({
     address: userAddress,
-    token: tokenAddress as `0x${string}`,
+    // For native tokens, don't pass token parameter. For ERC20 tokens, pass the token address
+    token: isNativeToken ? undefined : (tokenAddress as `0x${string}`),
     query: {
       enabled: !!userAddress && !!tokenAddress,
       refetchInterval: 10000, // Refetch every 10 seconds
@@ -32,10 +36,10 @@ export function useTokenBalance(tokenAddress?: string, decimals: number = 18): T
   // Format the balance for display
   const formatBalance = (rawBalance?: bigint, decimals: number = 18): { formatted: string; number: number } => {
     if (!rawBalance) return { formatted: '0.00', number: 0 }
-    
+
     const formatted = formatUnits(rawBalance, decimals)
     const number = parseFloat(formatted)
-    
+
     // Format with appropriate decimal places
     if (number >= 1000000) {
       return { formatted: (number / 1000000).toFixed(2) + 'M', number }
@@ -62,17 +66,22 @@ export function useTokenBalance(tokenAddress?: string, decimals: number = 18): T
   }
 }
 
+// Helper function to check if token is native
+export function isNativeToken(tokenAddress?: string): boolean {
+  return tokenAddress === "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
+}
+
 // Helper function to get max amount user can supply (considering gas fees)
-export function getMaxSupplyAmount(balance: number, isNativeToken: boolean = false): string {
+export function getMaxSupplyAmount(balance: number, tokenAddress?: string): string {
   if (balance <= 0) return '0'
-  
+
   // For native tokens (ETH, MATIC), reserve some for gas fees
-  if (isNativeToken) {
+  if (isNativeToken(tokenAddress)) {
     const gasReserve = 0.001 // Reserve 0.001 ETH for gas
     const maxAmount = Math.max(0, balance - gasReserve)
     return maxAmount.toString()
   }
-  
+
   // For ERC20 tokens, user can supply full balance
   return balance.toString()
 }

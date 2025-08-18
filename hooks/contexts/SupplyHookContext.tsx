@@ -2,12 +2,12 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react'
 import { useAccount, useReadContract, useReadContracts } from 'wagmi'
 import { Address, formatUnits, parseUnits } from 'viem'
-import { 
-  AssetData, 
-  AssetType, 
-  UserData, 
-  FormattedAssetData, 
-  FormattedUserDebtData 
+import {
+  AssetData,
+  AssetType,
+  UserData,
+  FormattedAssetData,
+  FormattedUserDebtData
 } from '@/types/contracts'
 import { UIPoolDataABI, UI_POOL_DATA_ADDRESS } from '@/contracts/UIPoolData'
 import { PoolABI, POOL_ADDRESS } from '@/contracts/Pool' // Import from your first file
@@ -27,6 +27,7 @@ interface WithdrawFunctionParams {
   asset: Address
   amount: string
   decimals: number
+  symbol: string
 }
 
 interface SupplyContextValue {
@@ -35,23 +36,23 @@ interface SupplyContextValue {
   isLoadingAssets: boolean
   errorAssets: Error | null
   refetchAssets: () => void
-  
+
   // User data
   userData: any | null
   userDebtPositions: FormattedUserDebtData[]
   isLoadingUserData: boolean
   errorUserData: Error | null
   refetchUserData: () => void
-  
+
   // Supply function
   supply: (params: SupplyFunctionParams) => Promise<void>
-  
+
   withdraw: (params: WithdrawFunctionParams) => Promise<void>
 
   // tx state
   transactionState: TransactionState
   resetTransaction: () => void
-  
+
   // Helpers
   formatNumber: (value: string | number) => string
   formatPercentage: (value: string | number) => string
@@ -62,22 +63,22 @@ const SupplyContext = createContext<SupplyContextValue | undefined>(undefined)
 
 export function SupplyProvider({ children }: { children: React.ReactNode }) {
   const { address: userAddress } = useAccount()
-  
+
   // Universal transactions hook
-  const {execute, transactionState, reset} = useTransactions()
-  
+  const { execute, transactionState, reset } = useTransactions()
+
   // Fetch debt asset list
   const { data: debtAssetList, isLoading: isLoadingList, error: errorList, refetch: refetchList } = useReadContract({
     address: UI_POOL_DATA_ADDRESS,
     abi: UIPoolDataABI,
     functionName: 'getDebtAssetList',
   })
-  
+
   // Prepare contract calls for all assets
   const assetDataCalls = useMemo(() => {
     console.log('debtAssetList', debtAssetList)
     if (!debtAssetList || debtAssetList.length === 0) return []
-    
+
     return debtAssetList.map((asset) => ({
       address: UI_POOL_DATA_ADDRESS,
       abi: UIPoolDataABI,
@@ -85,16 +86,12 @@ export function SupplyProvider({ children }: { children: React.ReactNode }) {
       args: [asset],
     }))
   }, [debtAssetList])
-  
+
   // Fetch all asset data in parallel
   const { data: assetsData, isLoading: isLoadingData, error: errorData, refetch: refetchData } = useReadContracts({
     contracts: assetDataCalls,
   })
 
-  useEffect(() => {
-    console.log(errorData, "ERROR DATA")
-  }, [errorData])
-  
   // Fetch user data
   const { data: userData, isLoading: isLoadingUser, error: errorUser, refetch: refetchUser } = useReadContract({
     address: UI_POOL_DATA_ADDRESS,
@@ -102,17 +99,16 @@ export function SupplyProvider({ children }: { children: React.ReactNode }) {
     functionName: 'getUserData',
     args: userAddress ? [userAddress] : undefined,
   })
-  
+
   // Format asset data
   const formattedAssets = useMemo(() => {
-    console.log(assetsData, "ASSET DATA Debt Token")
     if (!assetsData || !debtAssetList) return []
-    
+
     return assetsData
       .map((result, index) => {
         if (result.status !== 'success' || !result.result) return null
-        
-        const assetData : any = result.result 
+
+        const assetData: any = result.result
         const assetAddress = debtAssetList[index]
         const metadata = ASSET_METADATA[assetAddress] || {
           symbol: 'UNKNOWN',
@@ -121,7 +117,7 @@ export function SupplyProvider({ children }: { children: React.ReactNode }) {
           color: '#666666',
           protocols: []
         }
-        
+
         const formatted: FormattedAssetData = {
           assetType: assetData.assetType,
           asset: assetData.asset,
@@ -140,17 +136,18 @@ export function SupplyProvider({ children }: { children: React.ReactNode }) {
           isFrozen: assetData.isFrozen,
           isPaused: assetData.isPaused,
           protocols: metadata.protocols,
+          currentPrice: Number(formatUnits(assetData.price, 8),)
         }
-        
+
         return formatted
       })
       .filter((asset): asset is FormattedAssetData => asset !== null)
   }, [assetsData, debtAssetList])
-  
+
   // Format user debt positions
   const formattedUserDebtPositions = useMemo(() => {
     if (!userData) return []
-    
+
     return userData.userDebtData.map((position) => {
       const assetAddress = position.debtAsset
       const metadata = ASSET_METADATA[assetAddress] || {
@@ -158,15 +155,15 @@ export function SupplyProvider({ children }: { children: React.ReactNode }) {
         name: 'Unknown Asset',
         icon: '?',
       }
-      
+
       // Find decimals from asset data
       const assetData = formattedAssets.find(a => a.asset === assetAddress)
       const decimals = assetData?.decimals || 18
-      
+
       const supplyBalance = formatUnits(position.supplyBalance, decimals)
       const borrowBalance = formatUnits(position.borrowBalance, decimals)
       const netBorrow = (parseFloat(supplyBalance) - parseFloat(borrowBalance)).toFixed(2)
-      
+
       return {
         debtAsset: position.debtAsset,
         symbol: metadata.symbol,
@@ -177,11 +174,12 @@ export function SupplyProvider({ children }: { children: React.ReactNode }) {
         supplyBalance,
         borrowBalance,
         netBorrow,
-        decimals: decimals
+        decimals: decimals,
+        currentPrice: assetData?.currentPrice
       }
     })
   }, [userData, formattedAssets])
-  
+
   // Simple supply function using the universal transactions hook
   const supply = async ({ asset, amount, decimals, isNativeToken = false, symbol }: SupplyFunctionParams) => {
     if (!userAddress) {
@@ -212,11 +210,11 @@ export function SupplyProvider({ children }: { children: React.ReactNode }) {
         isNativeToken,
       }
     }
-  
+
     // Execute transaction (handles approval + execution automatically)
     await execute(transactionRequest)
   }
-  
+
   // Auto-refetch data when transaction is completed
   // useEffect(() => {
   //   if (transactions.transactionState.isCompleted) {
@@ -224,7 +222,7 @@ export function SupplyProvider({ children }: { children: React.ReactNode }) {
   //     // Refetch both asset and user data after successful supply
   //     refetchData()
   //     refetchUser()
-      
+
   //     // Reset transaction after 3 seconds for better UX
   //     setTimeout(() => {
   //       transactions.reset()
@@ -232,17 +230,17 @@ export function SupplyProvider({ children }: { children: React.ReactNode }) {
   //   }
   // }, [transactions.transactionState.isCompleted, refetchData, refetchUser, transactions.reset])
 
-  const withdraw = async ({ asset, amount, decimals }: WithdrawFunctionParams) => {
+  const withdraw = async ({ asset, amount, decimals, symbol }: WithdrawFunctionParams) => {
     if (!userAddress) {
       throw new Error('User not connected')
     }
-    
+
     console.log('🚀 Starting withdraw transaction', { asset, amount, decimals })
     const amountInWei = parseUnits(amount, decimals)
-    
+
     // Get asset metadata for better logging
     const assetMetadata = formattedAssets.find(a => a.asset === asset)
-    
+
     // Create transaction request with type
     const transactionRequest = {
       type: 'withdraw' as ZeurTransactionType,
@@ -259,16 +257,16 @@ export function SupplyProvider({ children }: { children: React.ReactNode }) {
         spenderAddress: POOL_ADDRESS,
       } : undefined,
       metadata: {
-        asset: assetMetadata?.symbol || 'Unknown',
+        asset: symbol,
         amount: amount,
         decimals: decimals,
       }
     }
-    
+
     // Execute transaction
     await execute(transactionRequest)
   }
-  
+
   // Helper functions
   const formatNumber = (value: string | number) => {
     const num = typeof value === 'string' ? parseFloat(value) : value
@@ -276,17 +274,17 @@ export function SupplyProvider({ children }: { children: React.ReactNode }) {
     if (num >= 1e3) return `${(num / 1e3).toFixed(2)}K`
     return num.toFixed(2)
   }
-  
+
   const formatPercentage = (value: string | number) => {
     const bps = typeof value === 'string' ? parseInt(value) : value
     return `${(bps / 100).toFixed(2)}%`
   }
-  
+
   const formatUtilization = (value: string | bigint) => {
     const utilization = typeof value === 'string' ? parseFloat(value) : Number(value) / 1e18
     return `${(utilization * 100).toFixed(2)}%`
   }
-  
+
   const contextValue: SupplyContextValue = {
     debtAssets: formattedAssets,
     isLoadingAssets: isLoadingList || isLoadingData,
@@ -296,17 +294,17 @@ export function SupplyProvider({ children }: { children: React.ReactNode }) {
       refetchData()
       refetchUser()
     },
-    
+
     userData: userData || null,
     userDebtPositions: formattedUserDebtPositions,
     isLoadingUserData: isLoadingUser,
     errorUserData: errorUser || null,
     refetchUserData: refetchUser,
-    
+
     // write function
     supply,
     withdraw,
-    
+
     formatNumber,
     formatPercentage,
     formatUtilization,
@@ -314,7 +312,7 @@ export function SupplyProvider({ children }: { children: React.ReactNode }) {
     transactionState,
     resetTransaction: reset,
   }
-  
+
   return (
     <SupplyContext.Provider value={contextValue}>
       {children}

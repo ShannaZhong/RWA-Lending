@@ -112,63 +112,63 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="grid sm:grid-cols-1 lg:grid-cols-3 gap-2">
-          <div className="bg-purple-500/10 rounded-lg p-3 border border-purple-500/20">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-lg">
-                          🔷
-                        </div>
-                        <div>
-                          <div className="font-semibold text-white text-sm">ETH Collateral</div>
-                          <div className="text-xs text-slate-400">0.5 ETH ($1,710)</div>
-                        </div>
-                      </div>
-                      <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">Active</Badge>
-                    </div>
-                    <div className="grid grid-cols-3 gap-3 text-xs">
-                      <div>
-                        <div className="text-slate-400">Borrowed</div>
-                        <div className="font-semibold text-white">€1,000 EURC</div>
-                      </div>
-                      <div>
-                        <div className="text-slate-400">Health Factor</div>
-                        <div className="font-semibold text-green-400">1.8</div>
-                      </div>
-                      <div>
-                        <div className="text-slate-400">APY Earned</div>
-                        <div className="font-semibold text-white">4.2%</div>
-                      </div>
-                    </div>
+            <div className="bg-purple-500/10 rounded-lg p-3 border border-purple-500/20">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-lg">
+                    🔷
                   </div>
+                  <div>
+                    <div className="font-semibold text-white text-sm">ETH Collateral</div>
+                    <div className="text-xs text-slate-400">0.5 ETH ($1,710)</div>
+                  </div>
+                </div>
+                <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">Active</Badge>
+              </div>
+              <div className="grid grid-cols-3 gap-3 text-xs">
+                <div>
+                  <div className="text-slate-400">Borrowed</div>
+                  <div className="font-semibold text-white">€1,000 EURC</div>
+                </div>
+                <div>
+                  <div className="text-slate-400">Health Factor</div>
+                  <div className="font-semibold text-green-400">1.8</div>
+                </div>
+                <div>
+                  <div className="text-slate-400">APY Earned</div>
+                  <div className="font-semibold text-white">4.2%</div>
+                </div>
+              </div>
+            </div>
 
-                  <div className="bg-blue-500/10 rounded-lg p-3 border border-blue-500/20 h-full">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center text-lg">
-                          🟣
-                        </div>
-                        <div>
-                          <div className="font-semibold text-white text-sm">stETH Deposit</div>
-                          <div className="text-xs text-slate-400">1.2 stETH ($4,098)</div>
-                        </div>
-                      </div>
-                      <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">Earning</Badge>
-                    </div>
-                    <div className="grid grid-cols-3 gap-3 text-xs">
-                      <div>
-                        <div className="text-slate-400">Strategy</div>
-                        <div className="font-semibold text-white">Balanced</div>
-                      </div>
-                      <div>
-                        <div className="text-slate-400">Current APY</div>
-                        <div className="font-semibold text-green-400">5.8%</div>
-                      </div>
-                      <div>
-                        <div className="text-slate-400">Earned</div>
-                        <div className="font-semibold text-white">+0.02 ETH</div>
-                      </div>
-                    </div>
+            <div className="bg-blue-500/10 rounded-lg p-3 border border-blue-500/20 h-full">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center text-lg">
+                    🟣
                   </div>
+                  <div>
+                    <div className="font-semibold text-white text-sm">stETH Deposit</div>
+                    <div className="text-xs text-slate-400">1.2 stETH ($4,098)</div>
+                  </div>
+                </div>
+                <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">Earning</Badge>
+              </div>
+              <div className="grid grid-cols-3 gap-3 text-xs">
+                <div>
+                  <div className="text-slate-400">Strategy</div>
+                  <div className="font-semibold text-white">Balanced</div>
+                </div>
+                <div>
+                  <div className="text-slate-400">Current APY</div>
+                  <div className="font-semibold text-green-400">5.8%</div>
+                </div>
+                <div>
+                  <div className="text-slate-400">Earned</div>
+                  <div className="font-semibold text-white">+0.02 ETH</div>
+                </div>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -217,9 +217,8 @@ export default function DashboardPage() {
               {vaultStrategies.map((strategy, index) => (
                 <div
                   key={index}
-                  className={`p-2 rounded-lg flex items-center justify-between ${
-                    strategy.recommended ? "bg-purple-500/10 border border-purple-500/20" : ""
-                  }`}
+                  className={`p-2 rounded-lg flex items-center justify-between ${strategy.recommended ? "bg-purple-500/10 border border-purple-500/20" : ""
+                    }`}
                 >
                   <div className="flex items-center space-x-2">
                     <div
@@ -243,7 +242,7 @@ export default function DashboardPage() {
                   {/* <div className="text-lg font-bold text-green-400">{strategy.apy}</div> */}
                   <div className="flex flex-row gap-3 text-sm">
                     <div>
-                      <div className="text-slate-400">Current Holding</div>
+                      <div className="text-slate-400">Staked Amount</div>
                       <div className="font-semibold text-white">1000 EURC</div>
                     </div>
                     {/* <div>
